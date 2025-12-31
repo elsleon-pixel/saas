@@ -1,0 +1,8 @@
+{
+  "description": "Chip Talk - Multi-Tenant Poker Platform with AI League Architect.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ],
+  "name": "App"
+}

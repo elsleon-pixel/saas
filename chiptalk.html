@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <title>Chip Talk - Multi-Tenant Poker Platform</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23d4af37' /%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='white' stroke-width='3' stroke-dasharray='6,4' /%3E%3Ctext x='50' y='62' font-family='sans-serif' font-weight='900' font-size='34' text-anchor='middle' fill='black'%3ETPT%3C/text%3E%3C/svg%3E">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              poker: { green: '#0f3d2e', greenLight: '#1a5c45', red: '#8a1c1c', gold: '#d4af37', black: '#0a0a0a', dark: '#121212', card: '#1e1e1e' }
+            },
+            fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Merriweather', 'serif'] }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+      body { background-color: #0a0a0a; color: #e5e5e5; margin: 0; padding: 0; overflow-x: hidden; }
+      .loader { border: 4px solid #333; border-top: 4px solid #d4af37; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      
+      .custom-scroll::-webkit-scrollbar { width: 4px; }
+      .custom-scroll::-webkit-scrollbar-track { background: #121212; }
+      .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+      
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+      .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
+      .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script async src="https://ga.jspm.io/npm:es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@19.0.0",
+        "react-dom": "https://esm.sh/react-dom@19.0.0",
+        "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+        "react-router-dom": "https://esm.sh/react-router-dom@7.1.5?deps=react@19.0.0,react-dom@19.0.0",
+        "firebase/app": "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js",
+        "@google/genai": "https://esm.sh/@google/genai@1.34.0",
+        "heic2any": "https://esm.sh/heic2any@0.0.4"
+      }
+    }
+    </script>
+
+    <script>
+      // INLINE PLATFORM DEFAULTS: Guaranteed to exist before modules run
+      window.SYSTEM_CLUB_ID = "the-poker-tour";
+      window.DEFAULT_BLIND_STRUCTURE = [
+        { level: 1, small: 25, big: 50, ante: 0, duration: 20 },
+        { level: 2, small: 50, big: 100, ante: 0, duration: 20 },
+        { level: 3, small: 75, big: 150, ante: 0, duration: 20 },
+        { level: 4, small: 100, big: 200, ante: 0, duration: 20 },
+        { level: 5, small: 150, big: 300, ante: 0, duration: 20 },
+        { level: 6, small: 200, big: 400, ante: 0, duration: 20 },
+        { level: 7, small: 300, big: 600, ante: 0, duration: 20 },
+        { level: 8, small: 400, big: 800, ante: 0, duration: 20 },
+        { level: 9, small: 600, big: 1200, ante: 0, duration: 20 },
+        { level: 10, small: 800, big: 1600, ante: 0, duration: 20 },
+        { level: 11, small: 1000, big: 2000, ante: 0, duration: 20 },
+        { level: 12, small: 1500, big: 3000, ante: 0, duration: 20 },
+        { level: 13, small: 2000, big: 4000, ante: 0, duration: 20 },
+        { level: 14, small: 3000, big: 6000, ante: 0, duration: 20 }
+      ];
+      window.DEFAULT_STARTING_STACK = 5500;
+      window.DEFAULT_CHECKIN_RADIUS_KM = 0.5;
+      window.DEFAULT_CLUB_CONFIG = {
+        name: "The Poker Tour",
+        slug: window.SYSTEM_CLUB_ID,
+        primaryColor: "#d4af37",
+        logoUrl: "logo.jpg",
+        venues: [
+          { name: "TWO22 Brew", lat: 39.6382, lng: -104.7938, games: [{ day: 1, time: "18:00" }] },
+          { name: "Tailgate Tavern & Grill", lat: 39.5186, lng: -104.7613, games: [{ day: 2, time: "19:00" }, { day: 3, time: "19:00" }, { day: 4, time: "19:00" }, { day: 6, time: "12:00" }, { day: 0, time: "17:00" }] },
+          { name: "The Rail Sports Pub", lat: 39.5396, lng: -104.8335, games: [{ day: 5, time: "19:00" }, { day: 6, time: "18:00" }, { day: 0, time: "13:00" }] }
+        ],
+        majorDetails: { label: "Spring Tournament", id: "spring", seasonKey: "2025_spring" }
+      };
+      console.log("Platform constants inlined successfully.");
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div id="app-loader" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center;">
+        <div class="loader"></div>
+        <h2 style="color: #d4af37; font-family: sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-top: 20px;">Waking up the engine...</h2>
+      </div>
+    </div>
+    
+    <script type="text/babel" data-type="module" data-presets="react" src="firebase-init.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="utils.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="ui.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="context.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="ProfilePokerChip.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="tournament-components.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="lobby-status.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="components.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="certs.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="venues.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="pages.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="login.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="reset.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="registration.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="club-signup.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="blog.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="verify-email.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="leadership-board.js"></script>
+    <script type="text/babel" data-type="module" data-presets="react" src="app.js"></script>
+  </body>
+</html>
