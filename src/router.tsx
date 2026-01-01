@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
+import MainLayout from "./layouts/MainLayout";
 
 import Home from "./pages/Home";
 import Tournaments from "./pages/Tournaments";
@@ -14,6 +14,9 @@ import NotFound from "./pages/NotFound";
 // Tenant pages
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+
+// ADDED: RequireAuth import
+import RequireAuth from "./components/RequireAuth";
 
 const router = createBrowserRouter([
   {
@@ -36,18 +39,3 @@ const router = createBrowserRouter([
   {
     path: "/:tenant",
     element: <MainLayout />,
-    children: [
-      { path: "login", element: <Login /> },
-      { path: "dashboard", element: <Dashboard /> },
-      { path: "tournaments", element: <Tournaments /> },
-      { path: "venues", element: <Venues /> },
-      { path: "standings", element: <Standings /> },
-      { path: "profile", element: <Profile /> },
-      { path: "support", element: <Support /> },
-      { path: "blog", element: <Blog /> },
-      { path: "blog/:id", element: <BlogPost /> }
-    ]
-  }
-]);
-
-export default router;

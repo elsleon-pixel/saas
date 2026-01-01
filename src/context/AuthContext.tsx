@@ -1,56 +1,41 @@
+import { createContext, useContext, useEffect, useState } from "react";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { auth } from "../utils/firebase";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-// Fix: Suppress TS errors for modular Firebase imports and handle User type casting.
-// @ts-ignore
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../utils/firebase';
-
-interface AuthState {
+interface AuthContextType {
   user: User | null;
-  userData: any;
   loading: boolean;
-  isSuperAdmin: boolean;
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthState>({ user: null, userData: null, loading: true, isSuperAdmin: false, logout: async () => {} });
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  logout: async () => {},
+});
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
-  const SUPER_ADMINS = ["YXrR8wSTzhOEizrmZIkQfu8ArOk2", "y2WKwptm1IZHDe5XAuV1epUF82B3"];
 
   useEffect(() => {
-    return onAuthStateChanged(auth, (currentUser: any) => {
-      const typedUser = currentUser as User | null;
-      setUser(typedUser);
-      if (typedUser) {
-        return onSnapshot(doc(db, "users2", typedUser.uid), (snap) => {
-          setUserData(snap.exists() ? snap.data() : { uid: typedUser.uid });
-          setLoading(false);
-        });
-      } else {
-        setUserData(null);
-        setLoading(false);
-      }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoading(false);
     });
+
+    return () => unsubscribe();
   }, []);
 
   const logout = async () => {
     await signOut(auth);
-    window.location.reload();
   };
 
-  const isSuperAdmin = !!user && SUPER_ADMINS.includes(user.uid);
-
   return (
-    <AuthContext.Provider value={{ user, userData, loading, logout, isSuperAdmin }}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => useContext(AuthContext);

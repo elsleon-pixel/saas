@@ -1,101 +1,70 @@
-import { Tournament } from "../data/mockTournaments";
+import { Link } from "react-router-dom";
+import StatusBadge from "./StatusBadge";
+import { useTheme } from "../context/ThemeContext";
 
-interface TournamentCardProps {
-  tournament: Tournament;
-}
+export default function TournamentCard({
+  tournament,
+  tenant,
+  showAdminActions = false,
+  onDelete
+}) {
+  const { theme } = useTheme();
 
-const statusColors: Record<Tournament["status"], string> = {
-  upcoming: "#1e90ff",
-  late_reg: "#ff8c00",
-  running: "#32cd32",
-  paused: "#ffd700",
-  completed: "#888888"
-};
+  const start = tournament.startDate
+    ? new Date(tournament.startDate).toLocaleDateString()
+    : "N/A";
 
-export function TournamentCard({ tournament }: TournamentCardProps) {
-  const {
-    name,
-    venue,
-    buyIn,
-    rake,
-    startingStack,
-    levelDurationMinutes,
-    maxPlayers,
-    registeredPlayers,
-    date,
-    status
-  } = tournament;
-
-  const statusColor = statusColors[status];
+  const end = tournament.endDate
+    ? new Date(tournament.endDate).toLocaleDateString()
+    : "N/A";
 
   return (
-    <div
+    <li
       style={{
-        background: "#111827",
-        borderRadius: 12,
         padding: 16,
-        border: "1px solid #1f2937",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.4)",
-        display: "flex",
-        flexDirection: "column",
-        gap: 8
+        backgroundColor: "#111",
+        borderRadius: 6,
+        marginBottom: 12
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-        <div>
-          <h3 style={{ margin: 0, color: "#f9fafb", fontSize: 18 }}>{name}</h3>
-          <p style={{ margin: 0, color: "#9ca3af", fontSize: 13 }}>{venue}</p>
-        </div>
-        <span
-          style={{
-            padding: "4px 10px",
-            borderRadius: 999,
-            fontSize: 11,
-            textTransform: "uppercase",
-            letterSpacing: 0.06,
-            backgroundColor: statusColor + "22",
-            color: statusColor,
-            border: `1px solid ${statusColor}55`
-          }}
-        >
-          {status.replace("_", " ")}
-        </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+        <strong style={{ fontSize: 18 }}>
+          {tournament.name || "Untitled Tournament"}
+        </strong>
+        <StatusBadge status={tournament.status} />
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: 8,
-          fontSize: 12,
-          color: "#d1d5db"
-        }}
-      >
-        <div>
-          <div style={{ color: "#9ca3af" }}>Buy‑in</div>
-          <div>
-            R{buyIn} + R{rake}
-          </div>
-        </div>
-        <div>
-          <div style={{ color: "#9ca3af" }}>Stack</div>
-          <div>{startingStack.toLocaleString()} chips</div>
-        </div>
-        <div>
-          <div style={{ color: "#9ca3af" }}>Level time</div>
-          <div>{levelDurationMinutes} min</div>
-        </div>
-        <div>
-          <div style={{ color: "#9ca3af" }}>Players</div>
-          <div>
-            {registeredPlayers}/{maxPlayers}
-          </div>
-        </div>
-        <div>
-          <div style={{ color: "#9ca3af" }}>Date</div>
-          <div>{new Date(date).toLocaleString()}</div>
-        </div>
+      <div style={{ color: "#9ca3af", marginBottom: 12 }}>
+        <div>Start: {start}</div>
+        <div>End: {end}</div>
       </div>
-    </div>
+
+      <div style={{ display: "flex", gap: 12 }}>
+        <Link
+          to={`/${tenant}/tournaments/${tournament.id}`}
+          style={{ color: theme.primaryColor, textDecoration: "none", fontWeight: 500 }}
+        >
+          View
+        </Link>
+
+        {showAdminActions && (
+          <>
+            <Link
+              to={`/${tenant}/admin/tournaments/${tournament.id}/edit`}
+              style={{ color: theme.primaryColor, textDecoration: "none" }}
+            >
+              Edit
+            </Link>
+
+            <span
+              onClick={onDelete}
+              style={{ color: "#ef4444", cursor: "pointer" }}
+            >
+              Delete
+            </span>
+          </>
+        )}
+      </div>
+    </li>
   );
 }

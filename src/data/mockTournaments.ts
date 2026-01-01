@@ -13,6 +13,7 @@ export interface Tournament {
   date: string; // ISO string
   status: TournamentStatus;
   isFeatured?: boolean;
+  tenant: string; // NEW: tenant slug
 }
 
 export const mockTournaments: Tournament[] = [
@@ -28,7 +29,8 @@ export const mockTournaments: Tournament[] = [
     registeredPlayers: 48,
     date: "2025-02-15T18:00:00Z",
     status: "late_reg",
-    isFeatured: true
+    isFeatured: true,
+    tenant: "chip-talk" // NEW
   },
   {
     id: "t2",
@@ -41,7 +43,8 @@ export const mockTournaments: Tournament[] = [
     maxPlayers: 40,
     registeredPlayers: 32,
     date: "2025-02-12T19:00:00Z",
-    status: "upcoming"
+    status: "upcoming",
+    tenant: "chip-talk" // NEW
   },
   {
     id: "t3",
@@ -55,6 +58,7 @@ export const mockTournaments: Tournament[] = [
     registeredPlayers: 97,
     date: "2025-03-01T16:00:00Z",
     status: "running",
-    isFeatured: true
+    isFeatured: true,
+    tenant: "chip-talk" // NEW
   }
 ];

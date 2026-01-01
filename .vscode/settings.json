@@ -1,0 +1,4 @@
+{
+  // Show the active editor's long path in the window title
+  "window.title": "${activeEditorLong}"
+}

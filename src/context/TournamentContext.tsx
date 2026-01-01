@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState, ReactNode } from "react";
 import { mockTournaments, Tournament } from "../data/mockTournaments";
+import { useTenant } from "../context/TenantContext";
 
 interface TournamentContextValue {
   tournaments: Tournament[];
@@ -15,21 +16,32 @@ interface TournamentProviderProps {
 }
 
 export function TournamentProvider({ children }: TournamentProviderProps) {
+  const { tenant } = useTenant();
+
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Mocked data for now; later this is where Firebase will plug in
+    if (!tenant) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
     try {
-      setTournaments(mockTournaments);
+      // Mocked data for now; later this is where Firebase will plug in
+      const tenantSpecific = mockTournaments.filter(t => t.tenant === tenant);
+
+      setTournaments(tenantSpecific);
       setLoading(false);
     } catch (err) {
       console.error(err);
       setError("Failed to load tournaments.");
       setLoading(false);
     }
-  }, []);
+  }, [tenant]);
 
   const featured = tournaments.filter(t => t.isFeatured);
 
