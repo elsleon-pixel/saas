@@ -1,4 +1,4 @@
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function Skeleton({ width = "100%", height = 16, style = {} }) {
   const { theme } = useTheme();
