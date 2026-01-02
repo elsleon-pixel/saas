@@ -34,6 +34,9 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import EditTournament from "./pages/admin/EditTournament";
 import TenantBranding from "./pages/admin/TenantBranding";
 
+// ⭐ NEW IMPORT — Login Screen
+import Login from "./screens/Login";
+
 function AppWrapper() {
   const { theme } = useTheme();
 
@@ -47,6 +50,10 @@ function AppWrapper() {
 
         <PageContainer>
           <Routes>
+
+            {/* ⭐ NEW ROUTE — Login Page */}
+            <Route path="/login" element={<Login />} />
+
             <Route path="/select" element={<TenantSelect />} />
 
             <Route
